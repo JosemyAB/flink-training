@@ -10,18 +10,18 @@ object MapExercise {
 
   @throws[Exception]
   def main(args: Array[String]): Unit = {
-    val job = new RideEnrichmentExerciseJob()
+    val job = new MapExerciseJob()
 
     job.runJob()
   }
 
-  private class RideEnrichmentExerciseJob() {
+  private class MapExerciseJob() {
     def runJob(): JobExecutionResult = {
 
       val rides = List(new TaxiRide(1L, true),
-                       new TaxiRide(2L, true),
-                       new TaxiRide(3L, true),
-                       new TaxiRide(4L, true))
+        new TaxiRide(2L, true),
+        new TaxiRide(3L, true),
+        new TaxiRide(4L, true))
 
       val env = StreamExecutionEnvironment.getExecutionEnvironment
 
