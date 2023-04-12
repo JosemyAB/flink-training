@@ -19,6 +19,7 @@
 package org.apache.flink.training.exercises.ridesandfares.scala
 
 import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.co.RichCoFlatMapFunction
 import org.apache.flink.streaming.api.functions.sink.{PrintSinkFunction, SinkFunction}
@@ -26,7 +27,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
 import org.apache.flink.training.exercises.common.datatypes.{RideAndFare, TaxiFare, TaxiRide}
 import org.apache.flink.training.exercises.common.sources.{TaxiFareGenerator, TaxiRideGenerator}
-import org.apache.flink.training.exercises.common.utils.MissingSolutionException
 import org.apache.flink.util.Collector
 
 /** The Stateful Enrichment exercise from the Flink training.
@@ -78,16 +78,34 @@ object RidesAndFaresExercise {
 
   class EnrichmentFunction() extends RichCoFlatMapFunction[TaxiRide, TaxiFare, RideAndFare] {
 
+    var rideState: ValueState[TaxiRide] = _
+    var fareState: ValueState[TaxiFare] = _
+
     override def open(parameters: Configuration): Unit = {
-      throw new MissingSolutionException()
+      rideState = getRuntimeContext.getState(
+        new ValueStateDescriptor[TaxiRide]("saved-ride", classOf[TaxiRide]))
+      fareState = getRuntimeContext.getState(
+        new ValueStateDescriptor[TaxiFare]("saved-fare", classOf[TaxiFare]))
     }
 
     override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {
-      throw new MissingSolutionException()
+      if (fareState.value() != null) {
+        fareState.clear()
+        out.collect(new RideAndFare(ride, fareState.value()))
+      }
+      else {
+        rideState.update(ride)
+      }
     }
 
     override def flatMap2(fare: TaxiFare, out: Collector[RideAndFare]): Unit = {
-      throw new MissingSolutionException()
+      if (rideState.value() != null) {
+        rideState.clear()
+        out.collect(new RideAndFare(rideState.value(), fare))
+      }
+      else {
+        fareState.update(fare)
+      }
     }
   }
 
