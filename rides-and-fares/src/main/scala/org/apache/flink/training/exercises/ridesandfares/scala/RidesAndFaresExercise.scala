@@ -90,8 +90,8 @@ object RidesAndFaresExercise {
 
     override def flatMap1(ride: TaxiRide, out: Collector[RideAndFare]): Unit = {
       if (fareState.value() != null) {
-        fareState.clear()
         out.collect(new RideAndFare(ride, fareState.value()))
+        fareState.clear()
       }
       else {
         rideState.update(ride)
@@ -100,8 +100,8 @@ object RidesAndFaresExercise {
 
     override def flatMap2(fare: TaxiFare, out: Collector[RideAndFare]): Unit = {
       if (rideState.value() != null) {
-        rideState.clear()
         out.collect(new RideAndFare(rideState.value(), fare))
+        rideState.clear()
       }
       else {
         fareState.update(fare)
